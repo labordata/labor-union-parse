@@ -8,7 +8,7 @@ WEIGHTS_DIR = src/labor_union_parser/weights
 FNUM_LOOKUP = $(WEIGHTS_DIR)/fnum_lookup.json
 MODEL_WEIGHTS = $(WEIGHTS_DIR)/char_cnn.pt
 
-all: $(MODEL_WEIGHTS) $(FNUM_LOOKUP)
+all: $(FNUM_LOOKUP)
 
 # Download and extract opdr.db
 $(DB_FILE):
