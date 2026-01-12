@@ -41,7 +41,7 @@ def main(input_file, column: str, output, batch_size: int, no_header: bool):
     Extract affiliation and designation from union names in a CSV file.
 
     Reads CSV from INPUT_FILE (or stdin if not specified) and appends columns:
-    pred_aff, pred_desig, pred_prob, pred_fnum, pred_fnum_multiple
+    pred_is_union, pred_aff, pred_unknown, pred_desig, pred_union_score, pred_fnum, pred_fnum_multiple
 
     Examples:
 
@@ -51,7 +51,6 @@ def main(input_file, column: str, output, batch_size: int, no_header: bool):
 
         labor-union-parser single_column.csv > results.csv
     """
-    # Handle --no-header mode
     if no_header:
         if column is not None:
             click.echo("Error: --no-header cannot be used with -c/--column", err=True)
@@ -108,9 +107,11 @@ def main(input_file, column: str, output, batch_size: int, no_header: bool):
 
     # Look up fnums and build output
     pred_fields = [
+        "pred_is_union",
         "pred_aff",
+        "pred_unknown",
         "pred_desig",
-        "pred_prob",
+        "pred_union_score",
         "pred_fnum",
         "pred_fnum_multiple",
     ]
@@ -122,8 +123,10 @@ def main(input_file, column: str, output, batch_size: int, no_header: bool):
         writer.writeheader()
 
         for text, result in zip(texts, results):
-            aff = result["affiliation"]
-            desig = result["designation"]
+            is_union = result["is_union"]
+            aff = result["affiliation"] or ""
+            unknown = result["affiliation_unrecognized"]
+            desig = result["designation"] or ""
             fnums = lookup_fnum(aff, desig) if aff and desig else []
 
             if len(fnums) == 0:
@@ -139,9 +142,11 @@ def main(input_file, column: str, output, batch_size: int, no_header: bool):
             writer.writerow(
                 {
                     "text": text,
+                    "pred_is_union": is_union,
                     "pred_aff": aff,
+                    "pred_unknown": unknown,
                     "pred_desig": desig,
-                    "pred_prob": f"{result['confidence']:.4f}",
+                    "pred_union_score": f"{result['union_score']:.4f}",
                     "pred_fnum": fnum_str,
                     "pred_fnum_multiple": fnum_multiple,
                 }
@@ -152,8 +157,10 @@ def main(input_file, column: str, output, batch_size: int, no_header: bool):
         writer.writeheader()
 
         for row, result in zip(rows, results):
-            aff = result["affiliation"]
-            desig = result["designation"]
+            is_union = result["is_union"]
+            aff = result["affiliation"] or ""
+            unknown = result["affiliation_unrecognized"]
+            desig = result["designation"] or ""
             fnums = lookup_fnum(aff, desig) if aff and desig else []
 
             if len(fnums) == 0:
@@ -166,9 +173,11 @@ def main(input_file, column: str, output, batch_size: int, no_header: bool):
                 fnum_str = json.dumps(fnums)
                 fnum_multiple = True
 
+            row["pred_is_union"] = is_union
             row["pred_aff"] = aff
+            row["pred_unknown"] = unknown
             row["pred_desig"] = desig
-            row["pred_prob"] = f"{result['confidence']:.4f}"
+            row["pred_union_score"] = f"{result['union_score']:.4f}"
             row["pred_fnum"] = fnum_str
             row["pred_fnum_multiple"] = fnum_multiple
 

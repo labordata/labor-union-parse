@@ -44,6 +44,34 @@ class TestAcronymHandling:
         assert get_tokens("U.S. Steel") == ["us", " ", "steel"]
 
 
+class TestSpacedAcronyms:
+    """Acronyms with spaces between letters should be merged."""
+
+    def test_afge_spaced(self):
+        assert get_tokens("A F G E - 2138") == ["afge", " ", "-", " ", "2138"]
+
+    def test_atu_spaced(self):
+        assert get_tokens("A T U - 425") == ["atu", " ", "-", " ", "425"]
+
+    def test_spaced_matches_no_spaces(self):
+        assert get_tokens("A F G E") == get_tokens("AFGE")
+
+    def test_spaced_matches_periods(self):
+        assert get_tokens("I B E W") == get_tokens("I.B.E.W.")
+
+    def test_spaced_in_context(self):
+        tokens = get_tokens("Local A F G E 123")
+        assert tokens == ["local", " ", "afge", " ", "123"]
+
+    def test_two_letter_spaced(self):
+        assert get_tokens("A W - 100") == ["aw", " ", "-", " ", "100"]
+
+    def test_not_single_letter_word(self):
+        # Single letter followed by a word should not merge
+        tokens = get_tokens("I am here")
+        assert tokens == ["i", " ", "am", " ", "here"]
+
+
 class TestAbbreviations:
     """Trailing periods after abbreviations (followed by space) should be dropped."""
 
@@ -118,6 +146,7 @@ if __name__ == "__main__":
 
     test_classes = [
         TestAcronymHandling,
+        TestSpacedAcronyms,
         TestAbbreviations,
         TestDecimalNumbers,
         TestOtherPunctuation,

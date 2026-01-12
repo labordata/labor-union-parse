@@ -173,6 +173,17 @@ def tokenize_to_chars(
     """
     import re
 
+    # Pre-process: merge space-separated single letters (A F G E → AFGE)
+    # Pattern matches single letters separated by spaces, not adjacent to other letters
+    def merge_spaced_letters(m):
+        return "".join(m.group(0).split())
+
+    text = re.sub(
+        r"(?<![A-Za-z])([A-Za-z])(?:\s+([A-Za-z]))+(?![A-Za-z])",
+        merge_spaced_letters,
+        text,
+    )
+
     # Regex pattern:
     # 1. Acronyms: single letters separated by periods (I.B.E.W.)
     # 2. Words: consecutive letters
