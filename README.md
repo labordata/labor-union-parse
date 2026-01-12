@@ -96,7 +96,7 @@ echo "SEIU Local 1199" | labor-union-parser --no-header
 | Field | Description |
 |-------|-------------|
 | `is_union` | Whether the text is detected as a union name |
-| `union_score` | Similarity score to union centroid (0-1) |
+| `union_score` | Similarity score to union centroid (higher = more confident)  |
 | `affiliation` | Predicted affiliation abbreviation (e.g., "SEIU", "IBT") or `None` |
 | `affiliation_unrecognized` | `True` if detected as union but affiliation unrecognized |
 | `designation` | Extracted local number (e.g., "1199") or empty string |
