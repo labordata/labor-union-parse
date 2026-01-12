@@ -385,7 +385,9 @@ class Extractor:
                 If similarity to nearest centroid < threshold, returns None (unrecognized).
         """
         if device is None:
-            self.device = torch.accelerator.current_accelerator() or torch.device("cpu")
+            self.device = torch.accelerator.current_accelerator(
+                check_available=True
+            ) or torch.device("cpu")
         else:
             self.device = device
 
